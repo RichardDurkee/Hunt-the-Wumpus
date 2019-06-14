@@ -34,15 +34,6 @@ vector<string> path;
 
 int main()
 {
-    cout << "*************************" << endl;
-    cout << "*             Richard   *" << endl;
-    cout << "* --\\--                 *" << endl;
-    cout << "*    \\ /-------\\        *" << endl;
-    cout << "*     /         \\----   *" << endl;
-    cout << "*    l-----------l      *" << endl;
-    cout << "*      l       l        *" << endl;
-    cout << "*************************" << endl;
-
     srand(static_cast<int>(time(0)));
 
     int mapSize = 7;
