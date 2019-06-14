@@ -1,0 +1,1166 @@
+#include <iostream>
+#include <iomanip>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <cstdlib>
+#include <cmath>
+#include <dos.h>
+#include <conio.h>
+#include <windows.h>
+#include <string>
+#include <ctime>
+#include <vector>
+
+using namespace std;
+
+int mapSize = 7;
+int search(int x [7][7], int playerx, int playery, int wumpx, int wumpy, int p1x, int p1y, int p2x, int p2y, int p3x, int p3y, int p4x, int p4y, int p5x, int p5y, int mapmax);
+int mysearch(int position[7][7], int nowx, int nowy, int wumpyx, int wumpyy, int pitx1, int pity1, int pitx2, int pity2, int pitx3, int pity3, int pitx4, int pity4, int pitx5, int pity5, int mapximum, int level);
+int direction = 0;
+int dontRepeat = 0;
+int isGreedySearch = 0;
+int pathLengthAverage = 0;
+int pathsMade = 0;
+int greedySearch = 0;
+int isTrueSearchTree = 0;
+int isDistanceTreeClipHeuristic = 0;
+int onSearchTree = 0;
+int nextToWumpus = 0;
+char currentop;
+long  numSearches = 0;
+int pathlength = 0;
+vector<string> path;
+
+int main()
+{
+    cout << "*************************" << endl;
+    cout << "*             Richard   *" << endl;
+    cout << "* --\\--                 *" << endl;
+    cout << "*    \\ /-------\\        *" << endl;
+    cout << "*     /         \\----   *" << endl;
+    cout << "*    l-----------l      *" << endl;
+    cout << "*      l       l        *" << endl;
+    cout << "*************************" << endl;
+
+    srand(static_cast<int>(time(0)));
+
+    int mapSize = 7;
+    int map [7][7] = {};
+    int startX = 0;
+    int startY = 0;
+    int pit1X = 0;
+    int pit1Y = 0;
+    int pit2X = 0;
+    int pit2Y = 0;
+    int pit3X = 0;
+    int pit3Y = 0;
+    int pit4X = 0;
+    int pit4Y = 0;
+    int pit5X = 0;
+    int pit5Y = 0;
+    int wumpusX = 0;
+    int wumpusY = 0;
+    int i = 0;
+    int n = 0;
+    int x = 0;
+    int z = 0;
+    int numSimulations = 1000;
+    int onAI = 0;
+    int pathDetermined = 0;
+    int randChoice = 0;
+    int wins = 0;
+    int losses = 0;
+    int hitWumpus = 0;
+    int numArrows = 0;
+    int isEmpty = 0;
+    string strChoice = "";
+    string strChoiceShot = "";
+    string strChoiceAI = "";
+    string strChoiceSearchTree = "";
+    string strChoiceDontRepeat = "";
+    string strGreedySearch = "";
+    string strTrueSearchTree = "";
+    string strDistanceHeuristic = "";
+
+    cout << "Activate AI (y/n)?" << endl;
+    cin >> strChoiceAI;
+    if (strChoiceAI == "y" || strChoiceAI == "Y" || strChoiceAI == "Yes" || strChoiceAI == "yes") {
+        onAI = 1;
+        cout << "Activate Random Search Tree (y/n)?" << endl;
+        cin >> strChoiceSearchTree;
+        if (strChoiceSearchTree == "y" || strChoiceSearchTree == "Y" || strChoiceSearchTree == "Yes" || strChoiceSearchTree == "yes") {
+            onSearchTree = 1;
+            cout << "Activate 'Don't Repeat' Heuristic (y/n)?" << endl;
+            cin >> strChoiceDontRepeat;
+            if (strChoiceDontRepeat == "y" || strChoiceDontRepeat == "Y" || strChoiceDontRepeat == "Yes" || strChoiceDontRepeat == "yes") {
+                dontRepeat = 1;
+                cout << "Activate Greedy Search (y/n)?" << endl;
+                cin >> strGreedySearch;
+                if (strGreedySearch == "y" || strGreedySearch == "Y" || strGreedySearch == "Yes" || strGreedySearch == "yes") {
+                    isGreedySearch = 1;
+                }
+            }
+        }
+        else {
+            cout << "Activate True Search Tree (y/n)?" << endl;
+            cin >> strTrueSearchTree;
+             if (strTrueSearchTree == "y" || strTrueSearchTree == "Y" || strTrueSearchTree == "Yes" || strTrueSearchTree == "yes") {
+                    isTrueSearchTree = 1;
+                    cout << "Activate Distance Heuristic (y/n)?" << endl;
+                    cin >> strDistanceHeuristic;
+                    if (strDistanceHeuristic == "y" || strDistanceHeuristic == "Y" || strDistanceHeuristic == "Yes" || strDistanceHeuristic == "yes") {
+                        isDistanceTreeClipHeuristic = 1;
+                    }
+                }
+        }
+    }
+
+    if (onAI == 1) {
+        for (n = 0; n < numSimulations; n++) {
+        int map [7][7] = {};
+        path.clear();
+        isEmpty = 0;
+        x = 0;
+        z = 0;
+        for (x = 0; x <= 7; x++) {
+            for (z = 0; z <= 7; z++) {
+                    map [x][z] = 0;
+            }
+        }
+
+        startX = 0;
+        startY = 0;
+        numArrows = 1; //reset variables
+        pathDetermined = 0;
+
+    startX = 1 + rand() % (mapSize);
+    startY = 1 + rand() % (mapSize);
+
+    pit1X = 1 + rand() % (mapSize);
+    pit1Y = 1 + rand() % (mapSize);
+
+    pit2X = 1 + rand() % (mapSize);
+    pit2Y = 1 + rand() % (mapSize);
+
+    pit3X = 1 + rand() % (mapSize);
+    pit3Y = 1 + rand() % (mapSize);
+
+    pit4X = 1 + rand() % (mapSize);
+    pit4Y = 1 + rand() % (mapSize);
+
+    pit5X = 1 + rand() % (mapSize);//search( x [][], playerx, playery, int wumpx, int wumpy, int p1x, int p1y, int p2x, int p2y, int p3x, int p3y, int p4x, int p4y, int p5x, int p5y)
+    pit5Y = 1 + rand() % (mapSize);
+
+    wumpusX = 1 + rand() % (mapSize);
+    wumpusY = 1 + rand() % (mapSize);
+    //cout << wumpusX << " ," << wumpusY << endl;
+    hitWumpus = 0;
+
+    //map [startX][startY] = 1;
+    map [pit1X][pit1Y] = 2;
+    map [pit2X][pit2Y] = 2;
+    map [pit3X][pit3Y] = 2;
+    map [pit4X][pit4Y] = 2;
+    map [pit5X][pit5Y] = 2;
+    map [wumpusX][wumpusY] = 3;
+    if (map [startX][startY] == 2) {
+        map [startX][startY] = 0;
+    }
+
+    startAI:
+
+    cout << startX << ", " << startY << endl;
+    if (map[startX][startY] == 2 || map[startX][startY] == 3) {
+        cout << "Aggghhhhh!!" << endl;
+        losses += 1;
+        path.clear();
+        continue;
+    }
+    if (numArrows == 0) {
+        losses += 1;
+        path.clear();
+        continue;
+    }
+    if (map[startX + 1][startY] == 2 || map[startX - 1][startY] == 2 || map[startX][startY + 1] == 2 || map[startX][startY - 1] == 2) {
+        cout << "I feel a draft." << endl;
+    }
+
+    //cout << "here" << endl;
+
+    if (map[startX + 1][startY] == 3 || map[startX - 1][startY] == 3 || map[startX][startY + 1] == 3 || map[startX][startY - 1] == 3) {
+        cout << "I smell a Wumpus." << endl;
+    }
+
+    //cout << "here 2" << endl;
+
+    string strChoice = "";
+    string strChoiceShot = "";
+
+    //cout << "here 3" << endl;
+
+    if ((onSearchTree == 0) && (isTrueSearchTree == 0)) {
+        randChoice = 1 + rand() % (5);
+        if (randChoice == 1){
+            strChoice = "w";
+        }
+        else if (randChoice == 2){
+            strChoice = "a";
+        }
+        else if (randChoice == 3){
+            strChoice = "s";
+        }
+        else if (randChoice == 4){
+            strChoice = "d";
+        }
+        else if (randChoice == 5){
+            strChoice = "x";
+        }
+    }
+
+    //cout << "here 4" << endl;
+
+    numSearches = 0;
+    pathlength = 0;
+
+    if (onSearchTree == 1 || isTrueSearchTree == 1) {
+        if (pathDetermined != 1){
+            if (isTrueSearchTree == 0) {
+                search(map, startX, startY, wumpusX, wumpusY, pit1X, pit1Y, pit2X, pit2Y, pit3X, pit3Y, pit4X, pit4Y, pit5X, pit5Y, mapSize);
+                pathDetermined = 1;
+            }
+            if (isTrueSearchTree == 1) {
+                cout << "-----";
+                mysearch(map, startX, startY, wumpusX, wumpusY, pit1X, pit1Y, pit2X, pit2Y, pit3X, pit3Y, pit4X, pit4Y, pit5X, pit5Y, mapSize, 0);
+                pathsMade += 1;
+                pathLengthAverage += pathlength;
+                pathDetermined = 1;
+            }
+        }
+        else {
+            if ((onSearchTree == 1) && (!(path.empty()))) {
+                strChoice = path.front();
+                path.erase(path.begin());
+            }
+            else if ((isTrueSearchTree == 1) && (!(path.empty()))) {
+                strChoice = path.back();
+                path.erase(path.end());
+            }
+            else {
+                isEmpty = 1;
+            }
+        }
+    }
+
+    if (isEmpty == 1) {
+
+        cout << direction << endl;
+        cout << wumpusX << ", " << wumpusY << endl;
+
+        strChoice = "x";
+
+        if (direction == 1) {
+                strChoiceShot = "d";
+            }
+            else if (direction == 2) {
+                strChoiceShot = "a";
+            }
+            else if (direction == 3) {
+                strChoiceShot = "w";
+            }
+            else if (direction == 4) {
+                strChoiceShot = "s";
+            }
+            else {
+
+                int randChoice = 1 + rand() % (4);
+
+                if (randChoice == 1){
+                    strChoiceShot = "w";
+                }
+                else if (randChoice == 2){
+                    strChoiceShot = "a";
+                }
+                else if (randChoice == 3){
+                    strChoiceShot = "s";
+                }
+                else if (randChoice == 4){
+                    strChoiceShot = "d";
+                }
+
+            }
+        }
+
+    if (strChoice == "w" || strChoice == "W") {
+        if (startY != mapSize ) {
+            startY += 1;
+        }
+        else {
+             cout << "I ran into a wall." << endl;
+        }
+    }
+    else if (strChoice == "s" || strChoice == "S") {
+        if (startY != 1 ) {
+            startY -= 1;
+        }
+        else {
+             cout << "I ran into a wall." << endl;
+        }
+    }
+    else if (strChoice == "d" || strChoice == "D") {
+        if (startX != mapSize ) {
+            startX += 1;
+        }
+        else {
+            cout << "I ran into a wall." << endl;
+        }
+    }
+    else if (strChoice == "a" || strChoice == "A") {
+        if (startX != 1 ) {
+            startX -= 1;
+        }
+        else {
+             cout << "I ran into a wall." << endl;
+        }
+    }
+    else if (strChoice == "x" || strChoice == "X") {
+        if (numArrows > 0) {
+        if (onAI != 1) {
+            cin >> strChoiceShot;
+        }
+        else {
+            if (onSearchTree != 1 && isTrueSearchTree != 1) {
+                int randChoice = 1 + rand() % (4);
+                if (randChoice == 1){
+                    strChoiceShot = "w";
+                }
+                else if (randChoice == 2){
+                    strChoiceShot = "a";
+                }
+                else if (randChoice == 3){
+                    strChoiceShot = "s";
+                }
+                else if (randChoice == 4){
+                    strChoiceShot = "d";
+                }
+            }
+        }
+        i = 0;
+        if (strChoiceShot == "w" || strChoiceShot == "W") {
+            for (i = startY; i <= (mapSize + 1); i++) {
+                if (map[startX][i] == 3) {
+                    cout << "You slayed the Wumpus!" << endl;
+                    wins += 1;
+                    hitWumpus = 1;
+                }
+            }
+            if (hitWumpus == 1){
+                continue;
+            }
+        }
+        if (strChoiceShot == "s" || strChoiceShot == "S") {
+            for (i = startY; i >= 0; i--) {
+                if (map[startX][i] == 3) {
+                    cout << "You slayed the Wumpus!" << endl;
+                    wins += 1;
+                    hitWumpus = 1;
+                }
+            }
+        }
+        if (strChoiceShot == "a" || strChoiceShot == "A") {
+            for (i = startX; i >= 0; i--) {
+                if (map[i][startY] == 3) {
+                    cout << "You slayed the Wumpus!" << endl;
+                    wins +=1;
+                    hitWumpus = 1;
+                }
+            }
+        }
+        if (strChoiceShot == "d" || strChoiceShot == "D") {
+            for (i = startX; i <= (mapSize + 1); i++) {
+                if (map[i][startY] == 3) {
+                    cout << "You slayed the Wumpus!" << endl;
+                    wins +=1;
+                    hitWumpus = 1;
+                }
+            }
+        }
+        if (hitWumpus == 1){
+                continue;
+            }
+        numArrows -= 1;
+        cout << "I have " << numArrows << " arrows left." << endl;
+        }
+        else {
+            cout << "I'm out of arrows." << endl;
+        }
+    }
+    goto startAI;
+    }
+    cout << "Wins: " << wins << " Losses: " << losses << endl;
+    cout << "Average Path Length: " << (pathLengthAverage / pathsMade) << endl;
+
+    return 0;
+    }
+
+
+
+
+
+
+    else {
+
+    startX = 1 + rand() % (mapSize);
+    startY = 1 + rand() % (mapSize);
+
+    pit1X = 1 + rand() % (mapSize);
+    pit1Y = 1 + rand() % (mapSize);
+
+    pit2X = 1 + rand() % (mapSize);
+    pit2Y = 1 + rand() % (mapSize);
+
+    pit3X = 1 + rand() % (mapSize);
+    pit3Y = 1 + rand() % (mapSize);
+
+
+    pit4X = 1 + rand() % (mapSize);
+    pit4Y = 1 + rand() % (mapSize);
+
+
+    pit5X = 1 + rand() % (mapSize);
+    pit5Y = 1 + rand() % (mapSize);
+
+
+    wumpusX = 1 + rand() % (mapSize);
+    wumpusY = 1 + rand() % (mapSize);
+
+    //cout << wumpusX << " ," << wumpusY << endl;
+
+    int map [mapSize][mapSize] = {};
+    map [startX][startY] = 1;
+    map [pit1X][pit1Y] = 2;
+    map [pit2X][pit2Y] = 2;
+    map [pit3X][pit3Y] = 2;
+    map [pit4X][pit4Y] = 2;
+    map [pit5X][pit5Y] = 2;
+    map [wumpusX][wumpusY] = 3;
+    numArrows = 3;
+
+    start:
+    cout << startX << ", " << startY << endl;
+    if (map[startX][startY] == 2 || map[startX][startY] == 3) {
+        cout << "Aggghhhhh!!" << endl;
+        system("pause");
+        return 0;
+    }
+    if (map[startX + 1][startY] == 2 || map[startX - 1][startY] == 2 || map[startX][startY + 1] == 2 || map[startX][startY - 1] == 2) {
+        cout << "I feel a draft." << endl;
+    }
+    if (map[startX + 1][startY] == 3 || map[startX - 1][startY] == 3 || map[startX][startY + 1] == 3 || map[startX][startY - 1] == 3) {
+        cout << "I smell a Wumpus." << endl;
+    }
+
+    string strChoice = "";
+    string choiceShot = "";
+    if (onAI != 1) {
+        cin >> strChoice;
+       // do {((strChoice != "w") || (strChoice != "s") || (strChoice != "a") || (strChoice != "d") || (strChoice != "W") || (strChoice != "S") || (strChoice != "A") || (strChoice != "D") ||) {
+
+      //  }
+    }
+    else
+         randChoice = 1 + rand() % (5);
+         if (randChoice == 1){
+            strChoice = "w";
+         }
+         else if (randChoice == 2){
+            strChoice = "a";
+         }
+         else if (randChoice == 3){
+            strChoice = "s";
+         }
+         else if (randChoice == 4){
+            strChoice = "d";
+         }
+         else if (randChoice == 5){
+            strChoice = "x";
+         }
+
+    if (strChoice == "w" || strChoice == "W") {
+        if (startY != mapSize ) {
+            startY += 1;
+        }
+        else
+             cout << "I ran into a wall." << endl;
+        }
+    else if (strChoice == "s" || strChoice == "S") {
+        if (startY != 1 ) {
+            startY -= 1;
+        }
+        else
+             cout << "I ran into a wall." << endl;
+        }
+    else if (strChoice == "d" || strChoice == "D") {
+        if (startX != mapSize ) {
+            startX += 1;
+        }
+        else
+            cout << "I ran into a wall." << endl;
+        }
+    else if (strChoice == "a" || strChoice == "A") {
+        if (startX != 1 ) {
+            startX -= 1;
+        }
+        else
+             cout << "I ran into a wall." << endl;
+        }
+    else if (strChoice == "x" || strChoice == "X") {
+        if (numArrows > 0) {
+        if (onAI != 1) {
+            cin >> choiceShot;
+        }
+        else {
+            int randChoice = 1 + rand() % (5);
+            if (randChoice == 1){
+                strChoice = "w";
+            }
+            else if (randChoice == 2){
+                strChoice = "a";
+            }
+            else if (randChoice == 3){
+                strChoice = "s";
+            }
+            else if (randChoice == 4){
+                strChoice = "d";
+            }
+            else if (randChoice == 5){
+                strChoice = "x";
+            }
+        }
+        i = 0;
+        if (choiceShot == "w" || choiceShot == "W") {
+            for (i = startY; i <= mapSize; i++) {
+                if (map[startX][i] == 3) {
+                    cout << "You slayed the Wumpus!" << endl;
+                    system("pause");
+                    return 0;
+                }
+            }
+        }
+        if (choiceShot == "s" || choiceShot == "S") {
+            for (i = startY; i >= 1; i--) {
+                if (map[startX][i] == 3) {
+                    cout << "You slayed the Wumpus!" << endl;
+                    system("pause");
+                    return 0;
+                }
+            }
+        }
+        if (choiceShot == "a" || choiceShot == "A") {
+            for (i = startX; i >= 1; i--) {
+                if (map[i][startY] == 3) {
+                    cout << "You slayed the Wumpus!" << endl;
+                    system("pause");
+                    return 0;
+                }
+            }
+        }
+        if (choiceShot == "d" || choiceShot == "D") {
+            for (i = startX; i <= mapSize; i++) {
+                if (map[i][startY] == 3) {
+                    cout << "You slayed the Wumpus!" << endl;
+                    system("pause");
+                    return 0;
+                }
+            }
+        }
+        numArrows -= 1;
+        cout << "I have " << numArrows << " arrows left." << endl;
+        }
+        else {
+            cout << "I'm out of arrows." << endl;
+        }
+    }
+    goto start;
+    }
+}
+
+int search(int x [7][7], int playerx, int playery, int wumpx, int wumpy, int p1x, int p1y, int p2x, int p2y, int p3x, int p3y, int p4x, int p4y, int p5x, int p5y, int mapmax)
+{
+    //srand(static_cast<int>(time(0)));
+    pathlength = 0;
+    if (isTrueSearchTree != 1) {
+        path.clear();
+    }
+    int randomchoice = 0;
+    int addedx = 0;
+    int addedy = 0;
+    direction = 0;
+    int timesNothing = 0;
+    int tooLong = 0;
+    string strLastMove = "";
+    int currentDistance = 0;
+    int tempx = 0;
+    int tempy = 0;
+    int lastTry = 0;
+    nextToWumpus = 0;
+    //cout << playerx << " ," << playery;
+    cout << "---- ";
+    if ((x[playerx + 1][playery]) == 3) {
+        nextToWumpus = 1;
+        direction = 1;
+    }
+    else if  ((x[playerx - 1][playery]) == 3) {
+        nextToWumpus = 1;
+        direction = 2;
+    }
+    else if  ((x[playerx][playery + 1]) == 3) {
+        nextToWumpus = 1;
+        direction = 3;
+    }
+    else if  ((x[playerx][playery - 1]) == 3) {
+        nextToWumpus = 1;
+        direction = 4;
+    }
+
+    if (nextToWumpus == 0) {
+        pathsMade += 1;
+        if ((isTrueSearchTree != 1) && (dontRepeat != 1)) {
+        do {
+            randomchoice = 1 + rand() % (4);
+
+            if ((randomchoice == 1) && (x[playerx - 1][playery] != 2) && (x[playerx - 1][playery] != 3) && (playerx - 1 != 0)) {
+                playerx -= 1;
+                path.push_back("a");
+                cout << path.back() << " ";
+                pathlength += 1;
+            }
+            else if (randomchoice == 1) {
+                timesNothing += 1;
+            }
+            else if ((randomchoice == 2) && (x[playerx + 1][playery] != 2) && (x[playerx + 1][playery] != 3) && (playerx + 1 != (mapmax + 1))) {
+                playerx += 1;
+                path.push_back("d");
+                cout << path.back() << " ";
+                pathlength += 1;
+            }
+            else if (randomchoice == 2) {
+                timesNothing += 1;
+            }
+            else if ((randomchoice == 3) && (x[playerx][playery + 1] != 2) && (x[playerx][playery + 1] != 3) && (playery + 1 != (mapmax + 1))) {
+                playery += 1;
+                path.push_back("w");
+                cout << path.back() << " ";
+                pathlength += 1;
+            }
+            else if (randomchoice == 3) {
+                timesNothing += 1;
+            }
+            else if ((randomchoice == 4) && (x[playerx][playery - 1] != 2) && (x[playerx][playery - 1] != 3) && (playery - 1 != 0)) {
+                playery -= 1;
+                path.push_back("s");
+                cout << path.back() << " ";
+                pathlength += 1;
+            }
+            else if (randomchoice == 4) {
+                timesNothing += 1;
+            }
+
+           if ((x[playerx + 1][playery]) == 3) {
+                nextToWumpus = 1;
+                direction = 1;
+            }
+            else if  ((x[playerx - 1][playery]) == 3) {
+                nextToWumpus = 1;
+                direction = 2;
+            }
+            else if  ((x[playerx][playery + 1]) == 3) {
+                nextToWumpus = 1;
+                direction = 3;
+            }
+            else if  ((x[playerx][playery - 1]) == 3) {
+                nextToWumpus = 1;
+                direction = 4;
+            }
+
+            if (timesNothing > 1000) {
+                tooLong = 1;
+            }
+            if (pathlength > 1000) {
+                tooLong = 1;
+            }
+
+        } while (nextToWumpus == 0 && tooLong == 0);
+        }
+
+        else if (dontRepeat == 1) {
+            do {
+
+            randomchoice = 1 + rand() % (4);
+
+            if (!(path.empty())) {
+                strLastMove = path.back();
+            }
+
+            if ((randomchoice == 1) && (x[playerx - 1][playery] != 2) && (x[playerx - 1][playery] != 3) && (playerx - 1 != 0) && (strLastMove != "d")) {
+                playerx -= 1;
+                path.push_back("a");
+                cout << path.back() << " ";
+                pathlength += 1;
+            }
+            else if (randomchoice == 1) {
+                timesNothing += 1;
+            }
+            else if ((randomchoice == 2) && (x[playerx + 1][playery] != 2) && (x[playerx + 1][playery] != 3) && (playerx + 1 != (mapmax + 1)) && (strLastMove != "a")) {
+                playerx += 1;
+                path.push_back("d");
+                cout << path.back() << " ";
+                pathlength += 1;
+            }
+            else if (randomchoice == 2) {
+                timesNothing += 1;
+            }
+            else if ((randomchoice == 3) && (x[playerx][playery + 1] != 2) && (x[playerx][playery + 1] != 3) && (playery + 1 != (mapmax + 1)) && (strLastMove != "s")) {
+                playery += 1;
+                path.push_back("w");
+                cout << path.back() << " ";
+                pathlength += 1;
+            }
+            else if (randomchoice == 3) {
+                timesNothing += 1;
+            }
+            else if ((randomchoice == 4) && (x[playerx][playery - 1] != 2) && (x[playerx][playery - 1] != 3) && (playery - 1 != 0) && (strLastMove != "w")) {
+                playery -= 1;randomchoice = 1;
+                path.push_back("s");
+                cout << path.back() << " ";
+                pathlength += 1;
+            }
+            else if (randomchoice == 4) {
+                timesNothing += 1;
+            }
+
+           if ((x[playerx + 1][playery]) == 3) {
+                nextToWumpus = 1;
+                direction = 1;
+            }
+            else if  ((x[playerx - 1][playery]) == 3) {
+                nextToWumpus = 1;
+                direction = 2;
+            }
+            else if  ((x[playerx][playery + 1]) == 3) {
+                nextToWumpus = 1;
+                direction = 3;
+            }
+            else if  ((x[playerx][playery - 1]) == 3) {
+                nextToWumpus = 1;
+                direction = 4;
+            }
+
+            if (timesNothing > 1000) {
+                tooLong = 1;
+            }
+            if (pathlength > 1000) {
+                tooLong = 1;
+            }
+
+        } while (nextToWumpus == 0 && tooLong == 0);
+        }
+
+        else if (isGreedySearch == 1) {
+            do {
+
+            lastTry = 0;
+
+            if (playerx < wumpx) {
+                randomchoice = 2;
+            }
+            if (playerx > wumpx) {
+                randomchoice = 1;
+            }
+            if (playery < wumpy) {
+                randomchoice = 4;
+            }
+            if (playery < wumpy) {
+                randomchoice = 3;
+            }
+
+            if (randomchoice = lastTry) {
+                randomchoice = 1 + rand() % (4);
+            }
+
+            if (!(path.empty())) {
+                strLastMove = path.back();
+            }
+
+            if ((randomchoice == 1) && (x[playerx - 1][playery] != 2) && (x[playerx - 1][playery] != 3) && (playerx - 1 != 0) && (strLastMove != "d")) {
+                playerx -= 1;
+                path.push_back("a");
+                cout << path.back() << " ";
+                pathlength += 1;
+            }
+            else if (randomchoice == 1) {
+                timesNothing += 1;
+                lastTry = randomchoice;
+            }
+            else if ((randomchoice == 2) && (x[playerx + 1][playery] != 2) && (x[playerx + 1][playery] != 3) && (playerx + 1 != (mapmax + 1)) && (strLastMove != "a")) {
+                playerx += 1;
+                path.push_back("d");
+                cout << path.back() << " ";
+                pathlength += 1;
+            }
+            else if (randomchoice == 2) {
+                timesNothing += 1;
+                lastTry = randomchoice;
+            }
+            else if ((randomchoice == 3) && (x[playerx][playery + 1] != 2) && (x[playerx][playery + 1] != 3) && (playery + 1 != (mapmax + 1)) && (strLastMove != "s")) {
+                playery += 1;
+                path.push_back("w");
+                cout << path.back() << " ";
+                pathlength += 1;
+            }
+            else if (randomchoice == 3) {
+                timesNothing += 1;
+                lastTry = randomchoice;
+            }
+            else if ((randomchoice == 4) && (x[playerx][playery - 1] != 2) && (x[playerx][playery - 1] != 3) && (playery - 1 != 0) && (strLastMove != "w")) {
+                playery -= 1;
+                path.push_back("s");
+                cout << path.back() << " ";
+                pathlength += 1;
+            }
+            else if (randomchoice == 4) {
+                timesNothing += 1;
+                lastTry = randomchoice;
+            }
+
+           if ((x[playerx + 1][playery]) == 3) {
+                nextToWumpus = 1;
+                direction = 1;
+            }
+            else if  ((x[playerx - 1][playery]) == 3) {
+                nextToWumpus = 1;
+                direction = 2;
+            }
+            else if  ((x[playerx][playery + 1]) == 3) {
+                nextToWumpus = 1;
+                direction = 3;
+            }
+            else if  ((x[playerx][playery - 1]) == 3) {
+                nextToWumpus = 1;
+                direction = 4;
+            }
+
+            if (timesNothing > 1000) {
+                tooLong = 1;
+            }
+            if (pathlength > 1000) {
+                tooLong = 1;
+            }
+
+        } while (nextToWumpus == 0 && tooLong == 0);
+        }
+        pathLengthAverage += pathlength;
+        cout << endl;
+    }
+    // << path.back();
+    return 0;
+}
+
+int mysearch(int position[7][7], int nowx, int nowy, int wumpyx, int wumpyy, int pitx1, int pity1, int pitx2, int pity2, int pitx3, int pity3, int pitx4, int pity4, int pitx5, int pity5, int mapximum, int level)
+{
+    numSearches += 1;
+   // if (numSearches % 100000 == 0) {
+      //  cout << numSearches << endl;
+   // }
+    vector<char> op;
+    double dLeft = 0;
+    double dRight = 0;
+    double dUp = 0;
+    double dDown = 0;
+
+     if (level == 20) {
+        return 0;
+    }
+
+    long long maxSearches = pow(4,20);
+
+    //cout << maxSearches << endl;
+   // cout << numSearches << endl;
+
+    if (level < 4) {
+        numSearches = 0;
+    }
+
+    if ((numSearches > maxSearches) && (level > 4)) {
+        //cout << "uh oh" << endl;
+        return 0;
+    }
+
+    if ((position[nowx][nowy] == 2) || (position[nowx][nowy] == 3) || (nowx == 0) || (nowy == 0) || (nowx == mapximum + 1) || (nowy == mapximum + 1)) {
+        //cout << "didnt work" << endl;
+        return 0;
+    }
+
+    if  (((nowx + 1) == wumpyx) && (nowy == wumpyy)) {
+        nextToWumpus = 1;
+        direction = 1;
+        return 1;
+    }
+    else if  (((nowx - 1) == wumpyx) && (nowy == wumpyy)) {
+        nextToWumpus = 1;
+        direction = 2;
+        return 1;
+    }
+    else if  ((nowx == wumpyx) && ((nowy + 1) == wumpyy)) {
+        nextToWumpus = 1;
+        direction = 3;
+        return 1;
+    }
+    else if  ((nowx == wumpyx) && ((nowy - 1) == wumpyy)) {
+        nextToWumpus = 1;
+        direction = 4;
+        return 1;
+    }
+
+    //cout << nowx << ", " << nowy << endl;
+    //cout << wumpyx << ", " << wumpyy << endl;
+
+    if (isDistanceTreeClipHeuristic == 0) {
+        op.push_back('w');
+        op.push_back('a');
+        op.push_back('s');
+        op.push_back('d');
+    }
+    else {
+        dLeft = sqrt(pow((wumpyx - (nowx - 1)), 2) + pow((wumpyy - nowy), 2));
+        dRight = sqrt(pow((wumpyx - (nowx + 1)), 2) + pow((wumpyy - nowy), 2));
+        dUp = sqrt(pow((wumpyx - nowx), 2) + pow((wumpyy - (nowy + 1)), 2));
+        dDown = sqrt(pow((wumpyx - nowx), 2) + pow((wumpyy - (nowy - 1)), 2));
+       cout << "dDown :" << dDown << " dUp: " << dUp << " dRight:" << dRight << " dLeft:" << dLeft << endl;
+
+        if ((dLeft <= dRight) && (dRight <= dUp) && (dUp <= dDown)) {
+            op.push_back('a');
+            op.push_back('d');
+            op.push_back('w');
+            op.push_back('s');
+        }
+        else if ((dLeft <= dUp) && (dUp <= dRight) && (dRight <= dDown)) {
+            op.push_back('a');
+            op.push_back('w');
+            op.push_back('d');
+            op.push_back('s');
+        }
+        else if ((dLeft <= dRight) && (dRight <= dDown) && (dDown <= dUp)) {
+            op.push_back('a');
+            op.push_back('d');
+            op.push_back('s');
+            op.push_back('w');
+        }
+        else if ((dLeft <= dDown) && (dDown <= dUp) && (dUp <= dRight)) {
+            op.push_back('a');
+            op.push_back('s');
+            op.push_back('w');
+            op.push_back('d');
+        }
+        else if ((dLeft <= dDown) && (dDown <= dRight) && (dRight <= dUp)) {
+            op.push_back('a');
+            op.push_back('s');
+            op.push_back('d');
+            op.push_back('w');
+        }
+        else if ((dLeft <= dUp) && (dUp <= dDown) && (dDown <= dRight)) {
+            op.push_back('a');
+            op.push_back('w');
+            op.push_back('s');
+            op.push_back('d');
+        }
+
+        else if ((dRight <= dDown) && (dDown <= dLeft) && (dLeft <= dUp)) {
+            op.push_back('d');
+            op.push_back('s');
+            op.push_back('a');
+            op.push_back('w');
+        }
+        else if ((dRight <= dDown) && (dDown <= dUp) && (dUp <= dLeft)) {
+            op.push_back('d');
+            op.push_back('s');
+            op.push_back('w');
+            op.push_back('a');
+        }
+        else if ((dRight <= dUp) && (dUp <= dDown) && (dDown <= dLeft)) {
+            op.push_back('d');
+            op.push_back('w');
+            op.push_back('s');
+            op.push_back('a');
+        }
+        else if ((dRight <= dUp) && (dUp <= dLeft) && (dLeft <= dDown)) {
+            op.push_back('d');
+            op.push_back('w');
+            op.push_back('a');
+            op.push_back('s');
+        }
+        else if ((dRight <= dLeft) && (dLeft <= dUp) && (dUp <= dDown)) {
+            op.push_back('d');
+            op.push_back('a');
+            op.push_back('w');
+            op.push_back('s');
+        }
+        else if ((dRight <= dLeft) && (dLeft <= dDown) && (dDown <= dUp)) {
+            op.push_back('d');
+            op.push_back('a');
+            op.push_back('s');
+            op.push_back('w');
+        }
+
+        else if ((dDown <= dLeft) && (dLeft <= dRight) && (dRight <= dUp)) {
+            op.push_back('s');
+            op.push_back('a');
+            op.push_back('d');
+            op.push_back('w');
+        }
+        else if ((dDown <= dLeft) && (dLeft <= dRight) && (dRight <= dUp)) {
+            op.push_back('s');
+            op.push_back('a');
+            op.push_back('d');
+            op.push_back('w');
+        }
+        else if ((dDown <= dRight) && (dRight <= dLeft) && (dLeft <= dUp)) {
+            op.push_back('s');
+            op.push_back('d');
+            op.push_back('a');
+            op.push_back('w');
+        }
+        else if ((dDown <= dRight) && (dRight <= dUp) && (dUp <= dLeft)) {
+            op.push_back('s');
+            op.push_back('d');
+            op.push_back('w');
+            op.push_back('a');
+        }
+        else if ((dDown <= dUp) && (dUp <= dLeft) && (dLeft <= dRight)) {
+            op.push_back('s');
+            op.push_back('w');
+            op.push_back('a');
+            op.push_back('d');
+        }
+        else if ((dDown <= dUp) && (dUp <= dRight) && (dRight <= dLeft)) {
+            op.push_back('s');
+            op.push_back('w');
+            op.push_back('d');
+            op.push_back('a');
+        }
+
+        else if ((dUp <= dLeft) && (dLeft <= dDown) && (dDown <= dRight)) {
+            op.push_back('w');
+            op.push_back('a');
+            op.push_back('s');
+            op.push_back('d');
+        }
+        else if ((dUp <= dLeft) && (dLeft <= dRight) && (dRight <= dDown)) {
+            op.push_back('w');
+            op.push_back('a');
+            op.push_back('d');
+            op.push_back('s');
+        }
+        else if ((dUp <= dRight) && (dRight <= dDown) && (dDown <= dLeft)) {
+            op.push_back('w');
+            op.push_back('d');
+            op.push_back('s');
+            op.push_back('a');
+        }
+        else if ((dUp <= dRight) && (dRight <= dLeft) && (dLeft <= dDown)) {
+            op.push_back('w');
+            op.push_back('d');
+            op.push_back('a');
+            op.push_back('s');
+        }
+        else if ((dUp <= dDown) && (dDown <= dRight) && (dRight <= dLeft)) {
+            op.push_back('w');
+            op.push_back('s');
+            op.push_back('d');
+            op.push_back('a');
+        }
+        else if ((dUp <= dDown) && (dDown <= dLeft) && (dLeft <= dRight)) {
+            op.push_back('w');
+            op.push_back('s');
+            op.push_back('a');
+            op.push_back('d');
+        }
+
+        else {
+            op.push_back('w');
+            op.push_back('a');
+            op.push_back('s');
+            op.push_back('d');
+        }
+    }
+    //cout << op.at(0) <<  " " << op.at(1) <<  " " << op.at(2) <<  " " << op.at(3) << endl;
+    //position[wumpyx][wumpyy] = 3;
+   //cout << level << " " << currentop << " " << nowx << " " << endl;
+
+    nextop:
+
+    if (!(op.empty())) {
+        currentop = op.front();
+        op.erase(op.begin());
+    }
+    else {
+        return 0;
+    }
+
+    switch(currentop)
+    {
+    case 'w':
+        if (mysearch(position, nowx, nowy + 1, wumpyx, wumpyy, pitx1, pity1, pitx2, pity2, pitx3, pity3, pitx4, pity4, pitx5, pity5, mapximum, level + 1) == 0) {
+            goto nextop;
+        }
+        else {
+            path.push_back("w");
+            cout << path.back() << " ";
+            pathlength += 1;
+            return 1;
+        }
+
+        break;
+    case 'a':
+        if (mysearch(position, nowx - 1, nowy, wumpyx, wumpyy, pitx1, pity1, pitx2, pity2, pitx3, pity3, pitx4, pity4, pitx5, pity5, mapximum, level + 1) == 0) {
+            goto nextop;
+        }
+        else {
+            path.push_back("a");
+            cout << path.back() << " ";
+            pathlength += 1;
+            return 1;
+        }
+
+        break;
+    case 's':
+        if (mysearch(position, nowx, nowy - 1, wumpyx, wumpyy, pitx1, pity1, pitx2, pity2, pitx3, pity3, pitx4, pity4, pitx5, pity5, mapximum, level + 1) == 0) {
+            goto nextop;
+        }
+        else {
+            path.push_back("s");
+            cout << path.back() << " ";
+            pathlength += 1;
+            return 1;
+        }
+
+        break;
+    case 'd':
+        //nowx +=1;
+        if (mysearch(position, nowx + 1, nowy, wumpyx, wumpyy, pitx1, pity1, pitx2, pity2, pitx3, pity3, pitx4, pity4, pitx5, pity5, mapximum, level + 1) == 0) {
+            return 0;
+        }
+        else {
+            path.push_back("d");
+            cout << path.back() << " ";
+            pathlength += 1;
+            return 1;
+        }
+
+        break;
+    default:
+        return 0;
+    }
+    return 0;
+
+}
